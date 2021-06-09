@@ -23,6 +23,11 @@ bool Block::damageBlock(int dmg)
     }
     return false;
 }
+
+int Block::getMaxHp()
+{
+    return maxHp;
+}
 //private functions
 
 

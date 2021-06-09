@@ -15,19 +15,22 @@
 
 void Tower::initBlocks(sf::Texture &blockTexture, std::vector<sf::Color> &colors)
 {
-    for(int i = 0; i < colors.size(); i++)
+    for(long long unsigned int i = 0; i < colors.size(); i++)
     {
         for(int j = 0; j < numBlocks[i]; j++)
         {
             Block tempBlock(pow(2,i),colors[i],blockTexture);
-            int offset_x = 0, offset_y = 0;
-            offset_x = (totalNumberOfBlocks%7)*40;
-            offset_y = (totalNumberOfBlocks/7)*40;
-            tempBlock.setPosition(tower_x+offset_x,tower_y-offset_y);
             this->towerBlocks.emplace_back(tempBlock);
             totalNumberOfBlocks++;
         }
     }
+    currentBlocks = totalNumberOfBlocks;
+}
+
+void Tower::randomizeBlocks()
+{
+    auto rng = std::default_random_engine{};
+    std::shuffle(std::begin(this->towerBlocks), std::end(this->towerBlocks), rng);
 }
 
 void Tower::initColors()
@@ -42,12 +45,28 @@ void Tower::initColors()
     this->colors.emplace_back(sf::Color(255,168,0));
 }
 
+void Tower::setBlocksPosition()
+{
+    int blocks = 0;
+    int offset_x = 0, offset_y = 0;
+    for(auto &block : towerBlocks)
+    {
+        offset_x = (blocks%7)*40;
+        offset_y = (blocks/7)*40;
+        block.setPosition(this->tower_x+offset_x, this->tower_y-offset_y);
+        blocks++;
+    }
+}
+
 //constructors / destructors
 Tower::Tower(sf::Texture &blockTexture, std::vector<int> &numBlocks)
 {
     this->numBlocks = numBlocks;
     initColors();
     initBlocks(blockTexture,colors);
+    randomizeBlocks();
+    setBlocksPosition();
+
 }
 Tower::~Tower()
 {
@@ -61,4 +80,31 @@ void Tower::towerDisplay(sf::RenderWindow &window)
     {
         window.draw(block);
     }
+}
+
+void Tower::removeBlock()
+{
+    currentBlocks--;
+}
+
+int Tower::getCurrentBlocks()
+{
+    return currentBlocks;
+}
+
+int Tower::getMaxBlocks()
+{
+    return totalNumberOfBlocks;
+}
+
+void Tower::makeNewTower(sf::Texture &blockTexture, std::vector<int> &numBlocks)
+{
+    towerBlocks.clear();
+    totalNumberOfBlocks = 0;
+    currentBlocks = 0;
+    this->numBlocks = numBlocks;
+    initColors();
+    initBlocks(blockTexture,colors);
+    randomizeBlocks();
+    setBlocksPosition();
 }

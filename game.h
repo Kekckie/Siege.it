@@ -15,6 +15,7 @@
 //Custom class includes
 #include "block.h"
 #include "tower.h"
+#include "blockmenu.h"
 
 class Game
 {
@@ -25,8 +26,14 @@ private:
     sf::RenderWindow *window;
     Block *block1;
     sf::Texture *blockTexture;
+    sf::Texture *menuTexture;
+    sf::Texture *plusTexture;
     Tower *tower;
     std::vector<int> numBlocks;
+    unsigned long long int points = 0;
+    sf::Text numPoints;
+    sf::Font font;
+    BlockMenu *menu;
     //private functions
     void initVariables();
     void initWindow();
@@ -34,6 +41,8 @@ private:
     void initTextures();
     void initTower(sf::Texture &blockTexture,std::vector<int> &numBlocks);
     void initNumBlocks();
+    void resetTower(sf::Texture &blockTexture,std::vector<int> &numBlocks);
+    void updatePoints();
 
 public:
     //constructors
@@ -45,6 +54,7 @@ public:
     void render();
     //accessors
     bool running() const;
+    sf::Vector2i getMousePositionRelativeToWindow();
 };
 
 

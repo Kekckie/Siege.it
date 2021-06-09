@@ -5,6 +5,7 @@ CONFIG -= qt
 
 SOURCES += \
         block.cpp \
+        blockmenu.cpp \
         game.cpp \
         main.cpp \
         tower.cpp
@@ -16,5 +17,6 @@ LIBS += -L"G:/SFML/lib" -lsfml-audio-d -lsfml-graphics-d -lsfml-main-d -lsfml-ne
 
 HEADERS += \
     block.h \
+    blockmenu.h \
     game.h \
     tower.h

@@ -1,5 +1,4 @@
 #include "blockmenu.h"
-#include "block.h"
 
 BlockMenu::BlockMenu(sf::Texture &menuTexture, sf::Texture &plusTexture, sf::Vector2f &position)
 {
@@ -11,6 +10,16 @@ BlockMenu::BlockMenu(sf::Texture &menuTexture, sf::Texture &plusTexture, sf::Vec
     this->plusSign.setScale(0.02,0.02);
     this->plusSign.setPosition(position.x+7,position.y+7);
 
+    this->font.loadFromFile("c:\\windows\\fonts\\arial.ttf");
+
+    this->upgradeText.setFont(font);
+    this->blockInfo.setFont(font);
+    this->upgradeText.setFillColor(sf::Color::White);
+    this->blockInfo.setFillColor(sf::Color::White);
+    this->upgradeText.setCharacterSize(14);
+    this->blockInfo.setCharacterSize(14);
+    this->upgradeText.setPosition(position.x+30,position.y+7);
+    this->blockInfo.setPosition(position.x+12, position.y+30);
 
 }
 
@@ -30,4 +39,16 @@ void BlockMenu::menuDisplay(sf::RenderWindow &window)
 sf::FloatRect BlockMenu::getGlobalBounds()
 {
     return this->menuBack.getGlobalBounds();
+}
+
+void BlockMenu::setMenuInfo(std::string info, std::string uptext)
+{
+    this->blockInfo.setString(info);
+    this->upgradeText.setString(uptext);
+
+}
+
+sf::FloatRect BlockMenu::getPlus()
+{
+    return this->plusSign.getGlobalBounds();
 }

@@ -10,7 +10,9 @@ Game::Game()
     this->initWindow();
     this->initTextures();
     this->initNumBlocks();
-    this->initTower(*this->blockTexture,this->numBlocks);
+    this->initColors();
+    this->initCopyBlocks(*blockTexture,colors);
+    this->initTower(this->copyBlocks);
 }
 
 Game::~Game()
@@ -53,11 +55,6 @@ void Game::initWindow()
     this->window = new sf::RenderWindow(this->videoMode,"SiegeIT", sf::Style::Titlebar | sf::Style::Close);
 }
 
-void Game::initBlock()
-{
-    this->block1 = new Block(1,sf::Color::Transparent,*this->blockTexture);
-}
-
 void Game::initTextures()
 {
     this->blockTexture = new sf::Texture();
@@ -79,12 +76,12 @@ void Game::initNumBlocks()
         this->numBlocks.emplace_back(0);
     }
     this->numBlocks[0] = 40;
-    this->numBlocks[1] = 40;
+    this->numBlocks[7] = 40;
 }
 
-void Game::resetTower(sf::Texture &blockTexture,std::vector<int> &numBlocks)
+void Game::resetTower(std::vector<int> &numBlocks)
 {
-    this->tower->makeNewTower(blockTexture,numBlocks);
+    this->tower->makeNewTower(numBlocks);
 }
 
 void Game::updatePoints()
@@ -92,9 +89,78 @@ void Game::updatePoints()
     this->numPoints.setString("Points: " + std::to_string(points));
 }
 
-void Game::initTower(sf::Texture &blockTexture,std::vector<int> &numBlocks)
+void Game::initColors()
 {
-    this->tower = new Tower(blockTexture,numBlocks);
+    this->colors.emplace_back(sf::Color::White);
+    this->colors.emplace_back(sf::Color::Blue);
+    this->colors.emplace_back(sf::Color::Cyan);
+    this->colors.emplace_back(sf::Color::Green);
+    this->colors.emplace_back(sf::Color::Magenta);
+    this->colors.emplace_back(sf::Color::Red);
+    this->colors.emplace_back(sf::Color::Yellow);
+    this->colors.emplace_back(sf::Color(255,168,0));
+}
+
+void Game::initCopyBlocks(sf::Texture &blockTexture, std::vector<sf::Color> &colors)
+{
+    for(int i = 0; i < colors.size(); i++)
+    {
+        Block tempBlock(pow(2,i),colors[i],blockTexture,i);
+        this->copyBlocks.emplace_back(tempBlock);
+    }
+}
+
+void Game::blockUpgradeMenuFunction()
+{
+    for(auto it = this->tower->towerBlocks.begin(); it < this->tower->towerBlocks.end(); it++)
+    {
+        if(it->getGlobalBounds().contains(window->mapPixelToCoords(getMousePositionRelativeToWindow())) and menuExists == false)
+        {
+            sf::Vector2f position(getMousePositionRelativeToWindow());
+//                        BlockMenu *temp = new BlockMenu(*menuTexture,*plusTexture,position);
+            it->createMenu(*menuTexture,*plusTexture,position);
+            if(it->getColor() == sf::Color(255,168,0))
+            {
+                std::string tempString = "-------";
+                it->setInfo(tempString);
+            }
+            else
+            {
+                std::string tempString = std::to_string(int(pow(it->getMaxHp()+1,2)));
+                it->setInfo(tempString);
+            }
+            menuExists = true;
+        }
+        else if(it->menuExists() and it->getMenuPlus().contains(window->mapPixelToCoords(getMousePositionRelativeToWindow())))
+        {
+            if(it->getLevel() < 7)
+            {
+                it->upgradeBlock(copyBlocks[it->getLevel()+1]);
+                this->numBlocks[it->getLevel()]--;
+                this->numBlocks[it->getLevel()+1]++;
+                std::string tempString = std::to_string(int(pow(it->getMaxHp()+1,2)));
+                if(it->getColor() == sf::Color(255,168,0))
+                {
+                    std::string tempString = "-------";
+                    it->setInfo(tempString);
+                }
+                else
+                {
+                    it->setInfo(tempString);
+                }
+            }
+        }
+        if(it->menuExists() and !it->getMenuWindow().contains(window->mapPixelToCoords(getMousePositionRelativeToWindow())))
+        {
+            it->deleteMenu();
+            menuExists = false;
+        }
+    }
+}
+
+void Game::initTower(std::vector<Block> &copyBlocks)
+{
+    this->tower = new Tower(copyBlocks,numBlocks);
 }
 //functions
 void Game::pollEvents()
@@ -112,24 +178,7 @@ void Game::pollEvents()
         case sf::Event::MouseButtonPressed:
             if(ev.mouseButton.button == sf::Mouse::Left)
             {
-                for(auto it = this->tower->towerBlocks.begin(); it < this->tower->towerBlocks.end(); it++)
-                {
-                    if(it->getGlobalBounds().contains(window->mapPixelToCoords(getMousePositionRelativeToWindow())) and this->menu == nullptr)
-                    {
-                        sf::Vector2f position(getMousePositionRelativeToWindow());
-                        BlockMenu *temp = new BlockMenu(*menuTexture,*plusTexture,position);
-                        this->menu = temp;
-                    }
-                    else if(this->menu != nullptr and this->menu->getGlobalBounds().contains(window->mapPixelToCoords(getMousePositionRelativeToWindow())))
-                    {
-                        break;
-                    }
-                    else
-                    {
-                        delete this->menu;
-                        this->menu = nullptr;
-                    }
-                }
+                blockUpgradeMenuFunction();
             }
             break;
 
@@ -152,7 +201,7 @@ void Game::update()
     if(this->tower->getCurrentBlocks() <= this->tower->getMaxBlocks()/10)
     {
         Tower *temp;
-        temp = new Tower(*blockTexture,numBlocks);
+        temp = new Tower(copyBlocks,numBlocks);
         delete tower;
         tower = temp;
     }
@@ -165,10 +214,7 @@ void Game::render()
     //Drawing game objects
     this->tower->towerDisplay(*this->window);
     this->window->draw(numPoints);
-    if(this->menu != nullptr)
-    {
-        this->menu->menuDisplay(*this->window);
-    }
+
     this->window->display();
 }
 //accessors

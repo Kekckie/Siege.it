@@ -34,15 +34,21 @@ private:
     sf::Text numPoints;
     sf::Font font;
     BlockMenu *menu;
+    std::vector<sf::Color> colors;
+    std::vector<Block> copyBlocks;
+    bool menuExists = false;
     //private functions
     void initVariables();
     void initWindow();
-    void initBlock();
     void initTextures();
-    void initTower(sf::Texture &blockTexture,std::vector<int> &numBlocks);
+    void initTower(std::vector<Block> &copyBlocks);
     void initNumBlocks();
-    void resetTower(sf::Texture &blockTexture,std::vector<int> &numBlocks);
+    void resetTower(std::vector<int> &numBlocks);
     void updatePoints();
+    void initColors();
+    void initCopyBlocks(sf::Texture &blockTexture, std::vector<sf::Color> &colors);
+    //event functions
+    void blockUpgradeMenuFunction();
 
 public:
     //constructors

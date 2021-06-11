@@ -1,35 +1,29 @@
 #include "tower.h"
 
 //private functions
-    //void Tower::initBlockNumbers(std::vector<int> &numBlocks)
-    //{
-    //this->numberOfBlockOfCertainType[sf::Color::White] = numBlocks[0];
-    //this->numberOfBlockOfCertainType[sf::Color::Blue] = numBlocks[1];
-    //this->numberOfBlockOfCertainType[sf::Color::Cyan] = numBlocks[2];
-    //this->numberOfBlockOfCertainType[sf::Color::Green] = numBlocks[3];
-    //this->numberOfBlockOfCertainType[sf::Color::Magenta] = numBlocks[4];
-    //this->numberOfBlockOfCertainType[sf::Color::Red] = numBlocks[5];
-    //this->numberOfBlockOfCertainType[sf::Color::Yellow] = numBlocks[6];
-    //this->numberOfBlockOfCertainType[sf::Color(255,168,0)] = numBlocks[7];
-    //}
-
-void Tower::initBlocks(sf::Texture &blockTexture, std::vector<sf::Color> &colors)
+void Tower::initCopyBlocks(std::vector<Block> &copyBlocks)
 {
-    for(long long unsigned int i = 0; i < colors.size(); i++)
+    this->copyBlocks = copyBlocks;
+}
+
+void Tower::initBlocks()
+{
+    for(int i = 0; i < numBlocks.size(); i++)
     {
-        for(int j = 0; j < numBlocks[i]; j++)
+        for(int j = 0 ; j < numBlocks[i]; j++)
         {
-            Block tempBlock(pow(2,i),colors[i],blockTexture);
-            this->towerBlocks.emplace_back(tempBlock);
-            totalNumberOfBlocks++;
+            Block *tempBlock = copyBlocks[i].Clone();
+            this->towerBlocks.emplace_back(*tempBlock);
+            currentBlocks++;
         }
     }
-    currentBlocks = totalNumberOfBlocks;
 }
+
+
 
 void Tower::randomizeBlocks()
 {
-    auto rng = std::default_random_engine{};
+    std::ranlux24 rng(rd());
     std::shuffle(std::begin(this->towerBlocks), std::end(this->towerBlocks), rng);
 }
 
@@ -59,11 +53,12 @@ void Tower::setBlocksPosition()
 }
 
 //constructors / destructors
-Tower::Tower(sf::Texture &blockTexture, std::vector<int> &numBlocks)
+Tower::Tower(std::vector<Block> &copyBlocks, std::vector<int> &numBlocks)
 {
     this->numBlocks = numBlocks;
     initColors();
-    initBlocks(blockTexture,colors);
+    initCopyBlocks(copyBlocks);
+    initBlocks();
     randomizeBlocks();
     setBlocksPosition();
 
@@ -79,6 +74,11 @@ void Tower::towerDisplay(sf::RenderWindow &window)
     for(auto &block : this->towerBlocks)
     {
         window.draw(block);
+    }
+    for(auto &block : this->towerBlocks)
+    {
+        if(block.menuExists())
+            block.displayMenu(window);
     }
 }
 
@@ -97,14 +97,18 @@ int Tower::getMaxBlocks()
     return totalNumberOfBlocks;
 }
 
-void Tower::makeNewTower(sf::Texture &blockTexture, std::vector<int> &numBlocks)
+void Tower::makeNewTower(std::vector<int> &numBlocks)
 {
     towerBlocks.clear();
     totalNumberOfBlocks = 0;
     currentBlocks = 0;
     this->numBlocks = numBlocks;
     initColors();
-    initBlocks(blockTexture,colors);
+    initBlocks();
     randomizeBlocks();
     setBlocksPosition();
 }
+
+
+
+

@@ -19,11 +19,16 @@ void Tower::initBlocks()
     }
 }
 
-
-
-void Tower::randomizeBlocks()
+void Tower::initRanlux()
 {
-    std::ranlux24 rng(rd());
+    this->rd = rand();
+    this->rng = new std::ranlux24(this->rd);
+}
+
+
+
+void Tower::randomizeBlocks(std::ranlux24 &rng)
+{
     std::shuffle(std::begin(this->towerBlocks), std::end(this->towerBlocks), rng);
 }
 
@@ -59,13 +64,14 @@ Tower::Tower(std::vector<Block> &copyBlocks, std::vector<int> &numBlocks)
     initColors();
     initCopyBlocks(copyBlocks);
     initBlocks();
-    randomizeBlocks();
+    initRanlux();
+    randomizeBlocks(*rng);
     setBlocksPosition();
 
 }
 Tower::~Tower()
 {
-
+    delete rng;
 }
 
 //functions
@@ -105,7 +111,8 @@ void Tower::makeNewTower(std::vector<int> &numBlocks)
     this->numBlocks = numBlocks;
     initColors();
     initBlocks();
-    randomizeBlocks();
+    initRanlux();
+    randomizeBlocks(*rng);
     setBlocksPosition();
 }
 

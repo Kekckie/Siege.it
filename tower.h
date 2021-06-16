@@ -12,12 +12,14 @@ private:
     std::vector<sf::Color> colors;
     std::vector<int> numBlocks;
     int tower_x = 1100, tower_y = 700;
-    std::random_device rd;
+    std::ranlux24 *rng;
+    int rd = rand();
     std::vector<Block> copyBlocks;
     //private functions
     void initCopyBlocks(std::vector<Block> &copyBlocks);
     void initBlocks();
-    void randomizeBlocks();
+    void initRanlux();
+    void randomizeBlocks(std::ranlux24 &rng);
     void initColors();
     void setBlocksPosition();
 

@@ -1,6 +1,7 @@
 #include "game.h"
 #include "block.h"
 #include "blockmenu.h"
+#include "towerupgrademenu.h"
 
 
 //constructors / destructors
@@ -13,16 +14,20 @@ Game::Game()
     this->initColors();
     this->initCopyBlocks(*blockTexture,colors);
     this->initTower(this->copyBlocks);
+    this->countBlocks();
+    this->initTowerUpgradeMenu();
+
+    this->machine.makeBallista();
 }
 
 Game::~Game()
 {
     delete this->window;
-    delete this->block1;
     delete this->blockTexture;
     delete this->tower;
     delete this->menuTexture;
     delete this->menu;
+    delete this->towerUpgradeMenu;
 }
 
 //private functions
@@ -39,8 +44,6 @@ void Game::initVariables()
 
     this->window = nullptr;
 
-    this->block1 = nullptr;
-
     this->blockTexture = nullptr;
     this->menuTexture = nullptr;
     this->plusTexture = nullptr;
@@ -48,6 +51,8 @@ void Game::initVariables()
     this->tower = nullptr;
 
     this->menu = nullptr;
+
+    this->towerUpgradeMenu = nullptr;
 }
 
 void Game::initWindow()
@@ -75,8 +80,7 @@ void Game::initNumBlocks()
     {
         this->numBlocks.emplace_back(0);
     }
-    this->numBlocks[0] = 40;
-    this->numBlocks[7] = 40;
+    this->numBlocks[0] = 1;
 }
 
 void Game::resetTower(std::vector<int> &numBlocks)
@@ -110,6 +114,22 @@ void Game::initCopyBlocks(sf::Texture &blockTexture, std::vector<sf::Color> &col
     }
 }
 
+void Game::countBlocks()
+{
+    for(auto &number : numBlocks)
+    {
+        currentBlocks+=number;
+    }
+}
+
+void Game::initTowerUpgradeMenu()
+{
+    sf::Vector2f position(1400,140);
+    this->towerUpgradeMenu = new TowerUpgradeMenu(*menuTexture,*plusTexture,position);
+    this->towerUpgradeMenu->setMenuInfo("Upgrade block number", std::to_string(currentBlocks) + " / 105");
+    this->towerUpgradeMenu->setCost(std::to_string(int(this->currentBlocks*2)));
+}
+
 void Game::blockUpgradeMenuFunction()
 {
     for(auto it = this->tower->towerBlocks.begin(); it < this->tower->towerBlocks.end(); it++)
@@ -135,19 +155,26 @@ void Game::blockUpgradeMenuFunction()
         {
             if(it->getLevel() < 7)
             {
-                it->upgradeBlock(copyBlocks[it->getLevel()+1]);
-                this->numBlocks[it->getLevel()]--;
-                this->numBlocks[it->getLevel()+1]++;
-                std::string tempString = std::to_string(int(pow(it->getMaxHp()+1,2)));
-                if(it->getColor() == sf::Color(255,168,0))
+                int cost = int(pow(it->getMaxHp()+1,2));
+                if(points >= cost)
                 {
-                    std::string tempString = "-------";
-                    it->setInfo(tempString);
+                    this->numBlocks[it->getLevel()]--;
+                    it->upgradeBlock(copyBlocks[it->getLevel()+1]);
+                    this->numBlocks[it->getLevel()]++;
+                    points -= cost;
+                    updatePoints();
+                    std::string tempString = std::to_string(cost);
+                    if(it->getLevel() == 7)
+                    {
+                        std::string tempString = "-------";
+                        it->setInfo(tempString);
+                    }
+                    else
+                    {
+                        it->setInfo(tempString);
+                    }
                 }
-                else
-                {
-                    it->setInfo(tempString);
-                }
+
             }
         }
         if(it->menuExists() and !it->getMenuWindow().contains(window->mapPixelToCoords(getMousePositionRelativeToWindow())))
@@ -179,6 +206,23 @@ void Game::pollEvents()
             if(ev.mouseButton.button == sf::Mouse::Left)
             {
                 blockUpgradeMenuFunction();
+                if(this->towerUpgradeMenu->getPlus().contains(sf::Vector2f(getMousePositionRelativeToWindow())))
+                {
+                     if(this->points >= currentBlocks*2 and currentBlocks < 105)
+                     {
+                         this->points -= currentBlocks*2;
+                         updatePoints();
+                         this->numBlocks[0]++;
+                         currentBlocks++;
+                         resetTower(numBlocks);
+                         this->towerUpgradeMenu->setCost(std::to_string(int(this->currentBlocks*2)));
+                     }
+                }
+            }
+            if(ev.mouseButton.button == sf::Mouse::Right)
+            {
+                resetTower(numBlocks);
+                menuExists = false;
             }
             break;
 
@@ -205,6 +249,7 @@ void Game::update()
         delete tower;
         tower = temp;
     }
+    this->machine.rotateMachine(*window);
 }
 void Game::render()
 {
@@ -214,6 +259,9 @@ void Game::render()
     //Drawing game objects
     this->tower->towerDisplay(*this->window);
     this->window->draw(numPoints);
+    this->towerUpgradeMenu->menuDisplay(*window);
+
+    this->machine.display(*window);
 
     this->window->display();
 }

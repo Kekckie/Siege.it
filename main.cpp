@@ -6,6 +6,7 @@ using namespace std;
 
 int main()
 {
+    std::srand(time(NULL));
     //new game "engine"
     Game game;
 

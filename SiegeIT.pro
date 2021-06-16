@@ -7,8 +7,10 @@ SOURCES += \
         block.cpp \
         blockmenu.cpp \
         game.cpp \
+        machine.cpp \
         main.cpp \
-        tower.cpp
+        tower.cpp \
+        towerupgrademenu.cpp
 
 INCLUDEPATH += "G:/SFML/include"
 DEPENDPATH += "G:/SFML/include"
@@ -19,4 +21,6 @@ HEADERS += \
     block.h \
     blockmenu.h \
     game.h \
-    tower.h
+    machine.h \
+    tower.h \
+    towerupgrademenu.h

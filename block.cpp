@@ -14,11 +14,7 @@ Block::Block(int maxHp, sf::Color color, sf::Texture &blockTexture, int blockLev
 
 Block::~Block()
 {
-    deleteMenu();
-    if(menu != nullptr)
-    {
-        delete menu;
-    }
+    delete menu;
 }
 
 bool Block::damageBlock(int dmg)

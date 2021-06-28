@@ -12,6 +12,7 @@
 #include <memory>
 #include <vector>
 #include <string>
+#include <math.h>
 
 #include "blockmenu.h"
 
@@ -23,6 +24,7 @@ private:
     int hp, maxHp;
     sf::Texture blockTexture;
     BlockMenu *menu;
+    bool canBeDamaged;
     //private functions
 
 public:
@@ -34,6 +36,7 @@ public:
     //functions
     bool damageBlock(int dmg);
     int getMaxHp();
+    int getCurrentHp();
     std::string stringColor();
     int getLevel();
     void upgradeBlock(Block &block);
@@ -41,12 +44,15 @@ public:
     void setInfo(std::string &info);
     void deleteMenu();
     Block *Clone() const {return new Block{*this};};
+    void switchDamagable(bool flag);
 
     //accessors
     bool menuExists();
     sf::FloatRect getMenuPlus();
     sf::FloatRect getMenuWindow();
     void displayMenu(sf::RenderWindow &window);
+    int cost();
+    bool isDamaged();
 
 };
 

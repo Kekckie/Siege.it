@@ -68,3 +68,8 @@ sf::FloatRect TowerUpgradeMenu::getGlobalBounds()
 {
     return this->menuBack.getGlobalBounds();
 }
+
+void TowerUpgradeMenu::setNumberOfBlocks(std::string number)
+{
+    this->upgradeText.setString(number+ " / 105");
+}

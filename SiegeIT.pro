@@ -8,7 +8,9 @@ SOURCES += \
         blockmenu.cpp \
         game.cpp \
         machine.cpp \
+        machinechangemenu.cpp \
         main.cpp \
+        projectiles.cpp \
         tower.cpp \
         towerupgrademenu.cpp
 
@@ -22,5 +24,7 @@ HEADERS += \
     blockmenu.h \
     game.h \
     machine.h \
+    machinechangemenu.h \
+    projectiles.h \
     tower.h \
     towerupgrademenu.h

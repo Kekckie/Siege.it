@@ -22,6 +22,7 @@ private:
     void randomizeBlocks(std::ranlux24 &rng);
     void initColors();
     void setBlocksPosition();
+    void countBlocks();
 
 
 

@@ -15,6 +15,7 @@ void Tower::initBlocks()
             Block *tempBlock = copyBlocks[i].Clone();
             this->towerBlocks.emplace_back(*tempBlock);
             currentBlocks++;
+            delete tempBlock;
         }
     }
 }
@@ -57,6 +58,14 @@ void Tower::setBlocksPosition()
     }
 }
 
+void Tower::countBlocks()
+{
+    for(auto &num : numBlocks)
+    {
+        totalNumberOfBlocks += num;
+    }
+}
+
 //constructors / destructors
 Tower::Tower(std::vector<Block> &copyBlocks, std::vector<int> &numBlocks)
 {
@@ -67,6 +76,7 @@ Tower::Tower(std::vector<Block> &copyBlocks, std::vector<int> &numBlocks)
     initRanlux();
     randomizeBlocks(*rng);
     setBlocksPosition();
+    countBlocks();
 
 }
 Tower::~Tower()
@@ -114,6 +124,7 @@ void Tower::makeNewTower(std::vector<int> &numBlocks)
     initRanlux();
     randomizeBlocks(*rng);
     setBlocksPosition();
+    countBlocks();
 }
 
 

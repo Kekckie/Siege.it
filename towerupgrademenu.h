@@ -32,6 +32,7 @@ public:
     void setMenuInfo(std::string blockInfo, std::string upgradeText);
     void setCost(std::string cost);
     sf::FloatRect getGlobalBounds();
+    void setNumberOfBlocks(std::string number);
 };
 
 #endif // TOWERUPGRADEMENU_H

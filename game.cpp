@@ -18,6 +18,10 @@ Game::Game()
     this->initTowerUpgradeMenu();
 
     this->machine.makeBallista();
+
+    this->getBounds();
+
+    this->machineChangeMenu = new MachineChangeMenu(*menuTexture);
 }
 
 Game::~Game()
@@ -28,6 +32,7 @@ Game::~Game()
     delete this->menuTexture;
     delete this->menu;
     delete this->towerUpgradeMenu;
+    delete this->machineChangeMenu;
 }
 
 //private functions
@@ -53,6 +58,9 @@ void Game::initVariables()
     this->menu = nullptr;
 
     this->towerUpgradeMenu = nullptr;
+
+    this->machineChangeMenu = nullptr;
+
 }
 
 void Game::initWindow()
@@ -130,6 +138,14 @@ void Game::initTowerUpgradeMenu()
     this->towerUpgradeMenu->setCost(std::to_string(int(this->currentBlocks*2)));
 }
 
+void Game::getBounds()
+{
+    this->bounds.left = 0;
+    this->bounds.top = 0;
+    this->bounds.width = window->getSize().x;
+    this->bounds.height = window->getSize().y;
+}
+
 void Game::blockUpgradeMenuFunction()
 {
     for(auto it = this->tower->towerBlocks.begin(); it < this->tower->towerBlocks.end(); it++)
@@ -146,7 +162,7 @@ void Game::blockUpgradeMenuFunction()
             }
             else
             {
-                std::string tempString = std::to_string(int(pow(it->getMaxHp()+1,2)));
+                std::string tempString = std::to_string(int(it->cost()));
                 it->setInfo(tempString);
             }
             menuExists = true;
@@ -155,15 +171,14 @@ void Game::blockUpgradeMenuFunction()
         {
             if(it->getLevel() < 7)
             {
-                int cost = int(pow(it->getMaxHp()+1,2));
-                if(points >= cost)
+                if(points >= it->cost())
                 {
                     this->numBlocks[it->getLevel()]--;
                     it->upgradeBlock(copyBlocks[it->getLevel()+1]);
                     this->numBlocks[it->getLevel()]++;
-                    points -= cost;
+                    points -= it->cost();
                     updatePoints();
-                    std::string tempString = std::to_string(cost);
+                    std::string tempString = std::to_string(it->cost());
                     if(it->getLevel() == 7)
                     {
                         std::string tempString = "-------";
@@ -181,6 +196,73 @@ void Game::blockUpgradeMenuFunction()
         {
             it->deleteMenu();
             menuExists = false;
+        }
+    }
+}
+
+void Game::numBlocksUpdate()
+{
+    if(this->towerUpgradeMenu->getPlus().contains(sf::Vector2f(getMousePositionRelativeToWindow())))
+    {
+         if(this->points >= currentBlocks*4 and currentBlocks < 105)
+         {
+             this->points -= currentBlocks*4;
+             updatePoints();
+             this->numBlocks[0]++;
+             currentBlocks++;
+             this->tower->makeNewTower(numBlocks);
+             menuExists = false;
+             this->towerUpgradeMenu->setCost(std::to_string(int(this->currentBlocks*4)));
+             this->towerUpgradeMenu->setNumberOfBlocks(std::to_string(currentBlocks));
+         }
+    }
+}
+
+void Game::damageBlocks()
+{
+    for(auto it = this->tower->towerBlocks.begin(); it < this->tower->towerBlocks.end(); it++)
+    {
+        if(!it->isDamaged() and it->getGlobalBounds().intersects(this->machine.getProjectileRect()) and !this->machine.isCannon())
+        {
+            it->switchDamagable(true);
+            int curHp = it->getCurrentHp();
+            if(it->damageBlock(this->machine.getProjectileDamage()))
+            {
+                this->points += it->getMaxHp();
+                this->tower->towerBlocks.erase(it);
+                this->tower->removeBlock();
+                it--;
+                updatePoints();
+            }
+            this->machine.update(curHp);
+        }
+        if(it->getGlobalBounds().intersects(this->machine.getProjectileRect()) and this->machine.isCannon())
+        {
+            sf::Vector2f center = it->getPosition();
+
+            sf::CircleShape boom(50);
+            boom.setPosition(center);
+            float Radius1 = this->machine.getRadius();
+
+            this->machine.update();
+
+            for(auto it = this->tower->towerBlocks.begin(); it < this->tower->towerBlocks.end(); it++)
+            {
+                float Radius2 = (it->getGlobalBounds().width + it->getGlobalBounds().height) / 4;
+                float xd = boom.getPosition().x - it->getPosition().x;
+                float yd = boom.getPosition().y - it->getPosition().y;
+                if(sqrt(xd * xd + yd * yd) <= Radius1 + Radius2)
+                {
+                    if(it->damageBlock(this->machine.getProjectileDamage()))
+                    {
+                        this->points += it->getMaxHp();
+                        this->tower->towerBlocks.erase(it);
+                        this->tower->removeBlock();
+                        it--;
+                        updatePoints();
+                    }
+                }
+            }
         }
     }
 }
@@ -206,18 +288,29 @@ void Game::pollEvents()
             if(ev.mouseButton.button == sf::Mouse::Left)
             {
                 blockUpgradeMenuFunction();
-                if(this->towerUpgradeMenu->getPlus().contains(sf::Vector2f(getMousePositionRelativeToWindow())))
+                numBlocksUpdate();
+                if(getMousePositionRelativeToWindow().x < 1000)
                 {
-                     if(this->points >= currentBlocks*2 and currentBlocks < 105)
-                     {
-                         this->points -= currentBlocks*2;
-                         updatePoints();
-                         this->numBlocks[0]++;
-                         currentBlocks++;
-                         resetTower(numBlocks);
-                         this->towerUpgradeMenu->setCost(std::to_string(int(this->currentBlocks*2)));
-                     }
+                    this->machine.shoot(*window);
+                        for(auto &block : this->tower->towerBlocks)
+                        {
+                            block.switchDamagable(false);
+                        }
                 }
+                sf::Vector2f position(getMousePositionRelativeToWindow());
+                if(this->machineChangeMenu->getBallistaButton().contains(position))
+                {
+                    this->machine.switchToBallista();
+                }
+                if(this->machineChangeMenu->getTrebuchetteButton().contains(position))
+                {
+                    this->machine.switchToTrebuchette();
+                }
+                if(this->machineChangeMenu->getCannonButton().contains(position))
+                {
+                    this->machine.switchToCannon();
+                }
+
             }
             if(ev.mouseButton.button == sf::Mouse::Right)
             {
@@ -241,15 +334,24 @@ void Game::pollEvents()
 }
 void Game::update()
 {
+    sf::Time elapsed = clock.restart();
     this->pollEvents();
-    if(this->tower->getCurrentBlocks() <= this->tower->getMaxBlocks()/10)
+    if(this->tower->getCurrentBlocks() <= this->tower->getMaxBlocks()/7)
     {
-        Tower *temp;
-        temp = new Tower(copyBlocks,numBlocks);
-        delete tower;
-        tower = temp;
+        this->counter += elapsed.asSeconds();
+        if(this->counter>1)
+        {
+            Tower *temp;
+            temp = new Tower(copyBlocks,numBlocks);
+            delete tower;
+            tower = temp;
+            menuExists = false;
+            this->counter = 0;
+        }
     }
     this->machine.rotateMachine(*window);
+    this->machine.animate(elapsed, bounds);
+    this->damageBlocks();
 }
 void Game::render()
 {
@@ -262,6 +364,8 @@ void Game::render()
     this->towerUpgradeMenu->menuDisplay(*window);
 
     this->machine.display(*window);
+
+    this->machineChangeMenu->display(*window);
 
     this->window->display();
 }

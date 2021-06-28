@@ -10,6 +10,7 @@ Block::Block(int maxHp, sf::Color color, sf::Texture &blockTexture, int blockLev
     this->hp = this->maxHp;
     this->blockLevel = blockLevel;
     this->menu = nullptr;
+    this->canBeDamaged = true;
 }
 
 Block::~Block()
@@ -31,6 +32,12 @@ int Block::getMaxHp()
 {
     return maxHp;
 }
+
+int Block::getCurrentHp()
+{
+    return hp;
+}
+
 
 std::string Block::stringColor()
 {
@@ -85,6 +92,11 @@ void Block::deleteMenu()
     }
 }
 
+void Block::switchDamagable(bool flag)
+{
+    this->canBeDamaged = flag;
+}
+
 //accessors
 
 bool Block::menuExists()
@@ -112,6 +124,16 @@ sf::FloatRect Block::getMenuWindow()
 void Block::displayMenu(sf::RenderWindow &window)
 {
     this->menu->menuDisplay(window);
+}
+
+int Block::cost()
+{
+    return pow((this->maxHp+1),2);
+}
+
+bool Block::isDamaged()
+{
+    return canBeDamaged;
 }
 
 

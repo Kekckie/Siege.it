@@ -19,6 +19,7 @@
 #include "blockmenu.h"
 #include "towerupgrademenu.h"
 #include "machine.h"
+#include "machinechangemenu.h"
 
 class Game
 {
@@ -27,6 +28,9 @@ private:
     sf::Event ev;
     sf::VideoMode videoMode;
     sf::RenderWindow *window;
+    sf::Clock clock;
+    float counter = 0;
+    sf::FloatRect bounds;
     //texture definitions
     sf::Texture *blockTexture;
     sf::Texture *menuTexture;
@@ -34,7 +38,7 @@ private:
     //tower definitions
     Tower *tower;
     std::vector<int> numBlocks;
-    unsigned long long int points = 4;
+    unsigned long long int points = 10000000000;
     sf::Text numPoints;
     sf::Font font;
     BlockMenu *menu;
@@ -44,6 +48,7 @@ private:
     const int maxBlocks = 105;
     int currentBlocks = 0;
     TowerUpgradeMenu *towerUpgradeMenu;
+    MachineChangeMenu *machineChangeMenu;
     //machine definitions
     Machine machine;
     //private functions
@@ -58,8 +63,11 @@ private:
     void initCopyBlocks(sf::Texture &blockTexture, std::vector<sf::Color> &colors);
     void countBlocks();
     void initTowerUpgradeMenu();
+    void getBounds();
     //event functions
     void blockUpgradeMenuFunction();
+    void numBlocksUpdate();
+    void damageBlocks();
 
 public:
     //constructors

@@ -3,7 +3,7 @@
 BlockMenu::BlockMenu(sf::Texture &menuTexture, sf::Texture &plusTexture, sf::Vector2f &position)
 {
     this->menuBack.setTexture(menuTexture);
-    this->menuBack.setScale(0.3,0.3);
+    this->menuBack.setScale(0.35,0.3);
     this->menuBack.setPosition(position);
 
     this->plusSign.setTexture(plusTexture);

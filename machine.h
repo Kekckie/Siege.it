@@ -24,6 +24,12 @@ private:
     Ballista *ballista;
     Trebuchette *trebuchette;
     Cannon *cannon;
+    //machine levels
+    int ballistaDmgLevel = 0;
+    int ballistaPiercingLevel = 0;
+    int trebuchetteDmgLevel = 0;
+    int cannonDmgLevel = 0;
+    int cannonRadiusLevel = 0;
 
 
 public:
@@ -42,10 +48,19 @@ public:
     void update(int &hpTaken);
     void update();
     bool isCannon();
+    bool isBallista();
+    int getDamageLevels();
+    int getSecondStatLevels();
+    int getSecondStatValues();
+    int getDamageUpgradeCost();
+    int getSecondStatUpgradeCost();
     //switchers
     void switchToBallista();
     void switchToTrebuchette();
     void switchToCannon();
+    //upgraders
+    void upgradeDmgLevel();
+    void upgradeSecondStat();
 };
 
 //==========================================================================
@@ -70,10 +85,12 @@ private:
     int dmgLevel = 0;
     int piercingLevel = 0;
     std::vector<int> dmg = {1,2,4,8,16,32,64,128,256,512};
+    std::vector<int> dmgCosts = {10,100,500,700,1000,2000,4000,10000,20000,60000};
     std::vector<int> piercing = {1,2,3,4,5,6,7,8,9,12};
+    std::vector<int> piercingCosts = {10,100,500,700,1000,2000,4000,10000,20000,60000};
 
 public:
-    Ballista();
+    Ballista(int dmgLevel, int piercingLevel);
     virtual ~Ballista();
     void display(sf::RenderWindow &window);
     void makeArrow(sf::RenderWindow &window);
@@ -84,6 +101,11 @@ public:
     sf::FloatRect getRect();
     int getArrowDmg();
     void blockPierced();
+    int getDmgLevel();
+    int getPiercingLevel();
+    int getPiercingValue();
+    int getDamageUpgradeCost();
+    int getPiercingUpgradeCost();
 };
 
 //=========================================================================
@@ -106,10 +128,11 @@ private:
     //variables
     int dmgLevel = 0;
     std::vector<int> dmg = {2,8,32,64,128,512,1024,2048,4096,10000};
+    std::vector<int> dmgCosts = {10,100,500,700,1000,2000,4000,10000,20000,60000};
     float animationCounter = 0;
     bool rockShot = false;
 public:
-    Trebuchette();
+    Trebuchette(int dmgLevel);
     ~Trebuchette();
     void display(sf::RenderWindow &window);
     void makeRock(sf::RenderWindow &window);
@@ -119,7 +142,8 @@ public:
     sf::FloatRect getRect();
     int getRockDmg();
     void rockDamaged(int &hpTaken);
-
+    int getDmgLevel();
+    int getDamageUpgradeCost();
 };
 //============================================================================
 class Cannon
@@ -137,12 +161,14 @@ private:
     sf::Sprite cannon;
     Bomb *bomb;
     //variables
-    int dmgLevel = 0;
+    int dmgLevel = 9;
     int radiusLevel = 0;
-    std::vector<int> radius = {50,100,150,200,250,300,350,400,450,500};
-    std::vector<int> dmg = {1,2,3,4,5,6,7,8,9,10};
+    std::vector<int> radius = {10,20,30,40,50,70,90,120,150,200};
+    std::vector<int> dmgCosts = {10,100,500,700,1000,2000,4000,10000,20000,60000};
+    std::vector<int> dmg = {1,2,4,8,16,32,64,128,256,512};
+    std::vector<int> radiusCosts = {10,100,500,700,1000,2000,4000,10000,20000,60000};
 public:
-    Cannon();
+    Cannon(int dmgLevel, int radiusLevel);
     ~Cannon();
     void display(sf::RenderWindow &window);
     void makeBomb(sf::RenderWindow &window);
@@ -154,8 +180,11 @@ public:
     sf::FloatRect getRect();
     int getBombDmg();
     int getBombRadius();
-
-
+    int getDmgLevel();
+    int getRadiusLevel();
+    int getRadiusValue();
+    int getDamageUpgradeCost();
+    int getRadiusUpgradeCost();
 };
 
 #endif // MACHINE_H

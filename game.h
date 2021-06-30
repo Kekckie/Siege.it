@@ -20,6 +20,7 @@
 #include "towerupgrademenu.h"
 #include "machine.h"
 #include "machinechangemenu.h"
+#include "machineupgrademenu.h"
 
 class Game
 {
@@ -30,8 +31,13 @@ private:
     sf::RenderWindow *window;
     sf::Clock clock;
     float counter = 0;
+    sf::Sprite bg;
+    sf::RectangleShape leftTower;
+    sf::RectangleShape rightTower;
     sf::FloatRect bounds;
     //texture definitions
+    sf::Texture *brickTexture;
+    sf::Texture *bgTexture;
     sf::Texture *blockTexture;
     sf::Texture *menuTexture;
     sf::Texture *plusTexture;
@@ -49,6 +55,7 @@ private:
     int currentBlocks = 0;
     TowerUpgradeMenu *towerUpgradeMenu;
     MachineChangeMenu *machineChangeMenu;
+    MachineUpgradeMenu *machineUpgradeMenu;
     //machine definitions
     Machine machine;
     //private functions

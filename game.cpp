@@ -1,8 +1,4 @@
 #include "game.h"
-#include "block.h"
-#include "blockmenu.h"
-#include "towerupgrademenu.h"
-
 
 //constructors / destructors
 Game::Game()
@@ -22,6 +18,22 @@ Game::Game()
     this->getBounds();
 
     this->machineChangeMenu = new MachineChangeMenu(*menuTexture);
+
+    this->machineUpgradeMenu = new MachineUpgradeMenu(*menuTexture, *plusTexture);
+    this->machineUpgradeMenu->updateFirstInfo(std::to_string(this->machine.getDamageLevels()), std::to_string(this->machine.getProjectileDamage()), std::to_string(this->machine.getDamageUpgradeCost()));
+    this->machineUpgradeMenu->updateSecondInfoBallista(std::to_string(this->machine.getSecondStatLevels()), std::to_string(this->machine.getSecondStatValues()), std::to_string(this->machine.getSecondStatUpgradeCost()));
+    this->machineUpgradeMenu->secondStatSwitch(true);
+
+    this->bg.setTexture(*bgTexture);
+    this->bg.setScale(0.5,0.5);
+
+    this->leftTower.setSize(sf::Vector2f(200,200));
+    this->leftTower.setTexture(brickTexture);
+    this->leftTower.setPosition(70,750);
+
+    this->rightTower.setSize(sf::Vector2f(300,300));
+    this->rightTower.setTexture(brickTexture);
+    this->rightTower.setPosition(1090,750);
 }
 
 Game::~Game()
@@ -33,6 +45,9 @@ Game::~Game()
     delete this->menu;
     delete this->towerUpgradeMenu;
     delete this->machineChangeMenu;
+    delete this->machineUpgradeMenu;
+    delete this->bgTexture;
+    delete this->brickTexture;
 }
 
 //private functions
@@ -52,6 +67,8 @@ void Game::initVariables()
     this->blockTexture = nullptr;
     this->menuTexture = nullptr;
     this->plusTexture = nullptr;
+    this->bgTexture = nullptr;
+    this->brickTexture = nullptr;
 
     this->tower = nullptr;
 
@@ -60,6 +77,8 @@ void Game::initVariables()
     this->towerUpgradeMenu = nullptr;
 
     this->machineChangeMenu = nullptr;
+
+    this->machineUpgradeMenu = nullptr;
 
 }
 
@@ -80,6 +99,14 @@ void Game::initTextures()
     this->plusTexture = new sf::Texture();
     this->plusTexture->loadFromFile("textures/plusButton.png");
     this->plusTexture->setSmooth(true);
+
+    this->bgTexture = new sf::Texture();
+    this->bgTexture->loadFromFile("textures/background.png");
+    this->bgTexture->setSmooth(true);
+
+    this->brickTexture = new sf::Texture();
+    this->brickTexture->loadFromFile("textures/brick.jpeg");
+    this->brickTexture->setRepeated(true);
 }
 
 void Game::initNumBlocks()
@@ -117,7 +144,7 @@ void Game::initCopyBlocks(sf::Texture &blockTexture, std::vector<sf::Color> &col
 {
     for(int i = 0; i < colors.size(); i++)
     {
-        Block tempBlock(pow(2,i),colors[i],blockTexture,i);
+        Block tempBlock(pow(4,i),colors[i],blockTexture,i);
         this->copyBlocks.emplace_back(tempBlock);
     }
 }
@@ -301,16 +328,50 @@ void Game::pollEvents()
                 if(this->machineChangeMenu->getBallistaButton().contains(position))
                 {
                     this->machine.switchToBallista();
+                    this->machineUpgradeMenu->updateFirstInfo(std::to_string(this->machine.getDamageLevels()),std::to_string(this->machine.getProjectileDamage()), std::to_string(this->machine.getDamageUpgradeCost()));
+                    this->machineUpgradeMenu->updateSecondInfoBallista(std::to_string(this->machine.getSecondStatLevels()), std::to_string(this->machine.getSecondStatValues()), std::to_string(this->machine.getSecondStatUpgradeCost()));
+                    this->machineUpgradeMenu->secondStatSwitch(true);
                 }
                 if(this->machineChangeMenu->getTrebuchetteButton().contains(position))
                 {
                     this->machine.switchToTrebuchette();
+                    this->machineUpgradeMenu->updateFirstInfo(std::to_string(this->machine.getDamageLevels()),std::to_string(this->machine.getProjectileDamage()), std::to_string(this->machine.getDamageUpgradeCost()));
+                    this->machineUpgradeMenu->secondStatSwitch(false);
                 }
                 if(this->machineChangeMenu->getCannonButton().contains(position))
                 {
                     this->machine.switchToCannon();
+                    this->machineUpgradeMenu->updateFirstInfo(std::to_string(this->machine.getDamageLevels()),std::to_string(this->machine.getProjectileDamage()), std::to_string(this->machine.getDamageUpgradeCost()));
+                    this->machineUpgradeMenu->updateSecondInfoCannon(std::to_string(this->machine.getSecondStatLevels()), std::to_string(this->machine.getSecondStatValues()), std::to_string(this->machine.getSecondStatUpgradeCost()));
+                    this->machineUpgradeMenu->secondStatSwitch(true);
                 }
-
+                if(this->machineUpgradeMenu->getFirstPlus().contains(position))
+                {
+                    if(this->machine.getDamageLevels() < 10 and this->points >= this->machine.getDamageUpgradeCost())
+                    {
+                        this->machine.upgradeDmgLevel();
+                        this->points -= this->machine.getDamageUpgradeCost();
+                        this->updatePoints();
+                        this->machineUpgradeMenu->updateFirstInfo(std::to_string(this->machine.getDamageLevels()),std::to_string(this->machine.getProjectileDamage()), std::to_string(this->machine.getDamageUpgradeCost()));
+                    }
+                }
+                if(this->machineUpgradeMenu->getSecondPlus().contains(position))
+                {
+                    if(this->machine.getSecondStatLevels() < 10 and this->points >= this->machine.getSecondStatUpgradeCost())
+                    {
+                        this->machine.upgradeSecondStat();
+                        this->points -= this->machine.getSecondStatUpgradeCost();
+                        this->updatePoints();
+                        if(this->machine.isCannon())
+                        {
+                            this->machineUpgradeMenu->updateSecondInfoCannon(std::to_string(this->machine.getSecondStatLevels()), std::to_string(this->machine.getSecondStatValues()), std::to_string(this->machine.getSecondStatUpgradeCost()));
+                        }
+                        else if(this->machine.isBallista())
+                        {
+                            this->machineUpgradeMenu->updateSecondInfoBallista(std::to_string(this->machine.getSecondStatLevels()), std::to_string(this->machine.getSecondStatValues()), std::to_string(this->machine.getSecondStatUpgradeCost()));
+                        }
+                    }
+                }
             }
             if(ev.mouseButton.button == sf::Mouse::Right)
             {
@@ -352,11 +413,34 @@ void Game::update()
     this->machine.rotateMachine(*window);
     this->machine.animate(elapsed, bounds);
     this->damageBlocks();
+
+    for(auto it = this->tower->towerBlocks.begin(); it < this->tower->towerBlocks.end(); it++)
+    {
+        if(it->getGlobalBounds().intersects(this->rightTower.getGlobalBounds()))
+        {
+            it->touching();
+        }
+        for(auto it2 = this->tower->towerBlocks.begin(); it2 < this->tower->towerBlocks.end(); it2++)
+        {
+            if(it!=it2)
+            {
+                if(it->getGlobalBounds().contains(it2->getGlobalBounds().left+20,it2->getGlobalBounds().top))
+                {
+                    it->touching();
+                }
+            }
+        }
+        it->animate(elapsed);
+    }
 }
 void Game::render()
 {
     //Clearing game objects
     this->window->clear(sf::Color::Black);
+    //drawing main objects and background
+    this->window->draw(this->bg);
+    this->window->draw(this->leftTower);
+    this->window->draw(this->rightTower);
 
     //Drawing game objects
     this->tower->towerDisplay(*this->window);
@@ -366,6 +450,8 @@ void Game::render()
     this->machine.display(*window);
 
     this->machineChangeMenu->display(*window);
+
+    this->machineUpgradeMenu->display(*window);
 
     this->window->display();
 }

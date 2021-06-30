@@ -136,6 +136,17 @@ bool Block::isDamaged()
     return canBeDamaged;
 }
 
+void Block::animate(sf::Time &elapsed)
+{
+    move(0, speed);
+    speed += 1*elapsed.asSeconds();
+}
+
+void Block::touching()
+{
+    speed = 0;
+}
+
 
 //private functions
 

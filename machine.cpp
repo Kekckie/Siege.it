@@ -32,17 +32,17 @@ void Machine::display(sf::RenderWindow &window)
 
 void Machine::makeBallista()
 {
-    this->ballista = new Ballista();
+    this->ballista = new Ballista(ballistaDmgLevel, ballistaPiercingLevel);
 }
 
 void Machine::makeTrebuchette()
 {
-    this->trebuchette = new Trebuchette();
+    this->trebuchette = new Trebuchette(trebuchetteDmgLevel);
 }
 
 void Machine::makeCannon()
 {
-    this->cannon = new Cannon();
+    this->cannon = new Cannon(cannonDmgLevel, cannonRadiusLevel);
 }
 
 void Machine::rotateMachine(sf::RenderWindow &win)
@@ -160,64 +160,195 @@ bool Machine::isCannon()
     }
 }
 
+bool Machine::isBallista()
+{
+    if(this->ballista != nullptr)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+int Machine::getDamageLevels()
+{
+    if(this->ballista != nullptr)
+    {
+        return this->ballista->getDmgLevel()+1;
+    }
+    if(this->trebuchette != nullptr)
+    {
+        return this->trebuchette->getDmgLevel()+1;
+    }
+    if(this->cannon != nullptr)
+    {
+        return this->cannon->getDmgLevel()+1;
+    }
+}
+
+int Machine::getSecondStatLevels()
+{
+    if(this->ballista != nullptr)
+    {
+        return this->ballista->getPiercingLevel()+1;
+    }
+    if(this->trebuchette != nullptr)
+    {
+        return 0;
+    }
+    if(this->cannon != nullptr)
+    {
+        return this->cannon->getRadiusLevel()+1;
+    }
+}
+
+int Machine::getSecondStatValues()
+{
+    if(this->ballista != nullptr)
+    {
+        return this->ballista->getPiercingValue();
+    }
+    if(this->trebuchette != nullptr)
+    {
+        return 0;
+    }
+    if(this->cannon != nullptr)
+    {
+        return this->cannon->getRadiusValue();
+    }
+}
+
+int Machine::getDamageUpgradeCost()
+{
+    if(this->ballista != nullptr)
+    {
+        return this->ballista->getDamageUpgradeCost();
+    }
+    if(this->trebuchette != nullptr)
+    {
+        return this->trebuchette->getDamageUpgradeCost();
+    }
+    if(this->cannon != nullptr)
+    {
+        return this->cannon->getDamageUpgradeCost();
+    }
+}
+
+int Machine::getSecondStatUpgradeCost()
+{
+    if(this->ballista != nullptr)
+    {
+        return this->ballista->getPiercingUpgradeCost();
+    }
+    if(this->trebuchette != nullptr)
+    {
+        return 0;
+    }
+    if(this->cannon != nullptr)
+    {
+        return this->cannon->getRadiusUpgradeCost();
+    }
+}
+
 void Machine::switchToBallista()
 {
-    if(this->ballista == nullptr)
+    if(this->ballista != nullptr)
     {
-        if(this->trebuchette != nullptr)
-        {
-            delete this->trebuchette;
-            this->trebuchette = nullptr;
-        }
-        if(this->cannon != nullptr)
-        {
-            delete this->cannon;
-            this->cannon = nullptr;
-        }
-        this->ballista = new Ballista();
+        delete this->ballista;
+        this->ballista = nullptr;
     }
+    if(this->trebuchette != nullptr)
+    {
+        delete this->trebuchette;
+        this->trebuchette = nullptr;
+    }
+    if(this->cannon != nullptr)
+    {
+        delete this->cannon;
+        this->cannon = nullptr;
+    }
+    this->ballista = new Ballista(ballistaDmgLevel,ballistaPiercingLevel);
 }
 
 void Machine::switchToTrebuchette()
 {
-    if(this->trebuchette == nullptr)
+    if(this->ballista != nullptr)
     {
-        if(this->ballista != nullptr)
-        {
-            delete this->ballista;
-            this->ballista = nullptr;
-        }
-        if(this->cannon != nullptr)
-        {
-            delete this->cannon;
-            this->cannon = nullptr;
-        }
-        this->trebuchette = new Trebuchette();
+        delete this->ballista;
+        this->ballista = nullptr;
     }
+    if(this->trebuchette != nullptr)
+    {
+        delete this->trebuchette;
+        this->trebuchette = nullptr;
+    }
+    if(this->cannon != nullptr)
+    {
+        delete this->cannon;
+        this->cannon = nullptr;
+    }
+    this->trebuchette = new Trebuchette(trebuchetteDmgLevel);
 }
 
 void Machine::switchToCannon()
 {
-    if(this->cannon == nullptr)
+    if(this->trebuchette != nullptr)
     {
-        if(this->trebuchette != nullptr)
-        {
-            delete this->trebuchette;
-            this->trebuchette = nullptr;
-        }
-        if(this->ballista != nullptr)
-        {
-            delete this->ballista;
-            this->ballista = nullptr;
-        }
-        this->cannon = new Cannon();
+        delete this->trebuchette;
+        this->trebuchette = nullptr;
+    }
+    if(this->ballista != nullptr)
+    {
+        delete this->ballista;
+        this->ballista = nullptr;
+    }
+    if(this->cannon != nullptr)
+    {
+        delete this->cannon;
+        this->cannon = nullptr;
+    }
+    this->cannon = new Cannon(cannonDmgLevel, cannonRadiusLevel);
+}
+
+void Machine::upgradeDmgLevel()
+{
+    if(this->ballista != nullptr)
+    {
+        this->ballistaDmgLevel++;
+        this->switchToBallista();
+    }
+    if(this->trebuchette != nullptr)
+    {
+        this->trebuchetteDmgLevel++;
+        this->switchToTrebuchette();
+    }
+    if(this->cannon != nullptr)
+    {
+        this->cannonDmgLevel++;
+        this->switchToCannon();
+    }
+}
+
+void Machine::upgradeSecondStat()
+{
+    if(this->ballista != nullptr)
+    {
+        this->ballistaPiercingLevel++;
+        this->switchToBallista();
+    }
+    if(this->cannon != nullptr)
+    {
+        this->cannonRadiusLevel++;
+        this->switchToCannon();
     }
 }
 
 
 //Ballista========================================================================
 
-Ballista::Ballista()
+Ballista::Ballista(int dmgLevel, int piercingLevel)
 {
     this->frontWheelTex.loadFromFile("textures/ballista/pieces/front-wheel.png");
     this->backWheelTex.loadFromFile("textures/ballista/pieces/backwheel.png");
@@ -251,6 +382,9 @@ Ballista::Ballista()
     this->bow.setOrigin(600,180);
 
     this->arrow = nullptr;
+
+    this->piercingLevel = piercingLevel;
+    this->dmgLevel = dmgLevel;
 }
 
 Ballista::~Ballista()
@@ -361,16 +495,41 @@ sf::FloatRect Ballista::getRect()
 
 int Ballista::getArrowDmg()
 {
-    return this->arrow->dmg;
+    return this->dmg[dmgLevel];
 }
 
 void Ballista::blockPierced()
 {
     this->arrow->piercing--;
 }
+
+int Ballista::getDmgLevel()
+{
+    return this->dmgLevel;
+}
+
+int Ballista::getPiercingLevel()
+{
+    return piercingLevel;
+}
+
+int Ballista::getPiercingValue()
+{
+    return piercing[piercingLevel];
+}
+
+int Ballista::getDamageUpgradeCost()
+{
+    return this->dmgCosts[dmgLevel];
+}
+
+int Ballista::getPiercingUpgradeCost()
+{
+    return this->piercingCosts[piercingLevel];
+}
 //Trebuchette=======================================================================
 
-Trebuchette::Trebuchette()
+Trebuchette::Trebuchette(int dmgLevel)
 {
     this->frontWheelTex.loadFromFile("textures/trebuchette/pieces/wheel-front.png");
     this->backWheelTex.loadFromFile("textures/trebuchette/pieces/wheel-back.png");
@@ -403,6 +562,8 @@ Trebuchette::Trebuchette()
     this->arm.setOrigin(380,200);
 
     this->rock = nullptr;
+
+    this->dmgLevel = dmgLevel;
 }
 Trebuchette::~Trebuchette()
 {
@@ -507,7 +668,7 @@ sf::FloatRect Trebuchette::getRect()
 
 int Trebuchette::getRockDmg()
 {
-    return this->rock->dmg;
+    return this->dmg[dmgLevel];
 }
 
 void Trebuchette::rockDamaged(int &hpTaken)
@@ -515,9 +676,19 @@ void Trebuchette::rockDamaged(int &hpTaken)
     this->rock->dmg -= hpTaken;
 }
 
+int Trebuchette::getDmgLevel()
+{
+    return this->dmgLevel;
+}
+
+int Trebuchette::getDamageUpgradeCost()
+{
+    return this->dmgCosts[dmgLevel];
+}
+
 //Cannon======================================================================
 
-Cannon::Cannon()
+Cannon::Cannon(int dmgLevel, int radiusLevel)
 {
     this->cannonTex.loadFromFile("textures/cannon/parts/cannon.png");
     this->bodyTex.loadFromFile("textures/cannon/parts/body.png");
@@ -545,6 +716,9 @@ Cannon::Cannon()
     this->body.setPosition(position.x, position.y);
 
     this->bomb = nullptr;
+
+    this->dmgLevel = dmgLevel;
+    this->radiusLevel = radiusLevel;
 }
 
 Cannon::~Cannon()
@@ -654,4 +828,29 @@ int Cannon::getBombDmg()
 int Cannon::getBombRadius()
 {
     return this->radius[radiusLevel];
+}
+
+int Cannon::getDmgLevel()
+{
+    return this->dmgLevel;
+}
+
+int Cannon::getRadiusLevel()
+{
+    return this->radiusLevel;
+}
+
+int Cannon::getRadiusValue()
+{
+    return this->radius[radiusLevel];
+}
+
+int Cannon::getDamageUpgradeCost()
+{
+    return this->dmgCosts[dmgLevel];
+}
+
+int Cannon::getRadiusUpgradeCost()
+{
+    return this->radiusCosts[radiusLevel];
 }

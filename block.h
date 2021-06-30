@@ -25,6 +25,7 @@ private:
     sf::Texture blockTexture;
     BlockMenu *menu;
     bool canBeDamaged;
+    float speed = 0;
     //private functions
 
 public:
@@ -53,6 +54,10 @@ public:
     void displayMenu(sf::RenderWindow &window);
     int cost();
     bool isDamaged();
+
+    void animate(sf::Time &elapsed);
+    void touching();
+
 
 };
 
